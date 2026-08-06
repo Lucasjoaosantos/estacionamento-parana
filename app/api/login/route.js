@@ -20,11 +20,6 @@ export async function POST(request) {
     .eq("ativo", true)
     .maybeSingle();
 
-  // DEBUG TEMPORÁRIO: mostra no log do Vercel o que realmente aconteceu.
-  console.error("LOGIN DEBUG - usuario recebido:", usuario);
-  console.error("LOGIN DEBUG - erro do Supabase:", error);
-  console.error("LOGIN DEBUG - usuario encontrado?:", !!user);
-
   if (error || !user) {
     return NextResponse.json(
       { erro: "Usuário ou senha inválidos." },
@@ -33,10 +28,6 @@ export async function POST(request) {
   }
 
   const senhaOk = await bcrypt.compare(senha, user.senha_hash);
-
-  // DEBUG TEMPORÁRIO
-  console.error("LOGIN DEBUG - senha confere?:", senhaOk);
-
   if (!senhaOk) {
     return NextResponse.json(
       { erro: "Usuário ou senha inválidos." },
