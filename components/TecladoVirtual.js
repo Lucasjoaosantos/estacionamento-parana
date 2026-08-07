@@ -25,37 +25,47 @@ export default function TecladoVirtual({
     onChange("");
   }
 
-  const linha1 = LETRAS.slice(0, 13);
-  const linha2 = LETRAS.slice(13);
+  const linha1 = LETRAS.slice(0, 13); // A-M
+  const linha2 = LETRAS.slice(13);    // N-Z
 
-  const classeTecla =
-    "h-24 min-w-24 rounded-xl2 bg-surface text-4xl font-bold border-2 border-white/10 active:bg-accent active:text-white transition-colors";
+  const teclaClass = `
+    w-16 h-20
+    rounded-xl2
+    bg-surface
+    text-3xl
+    font-bold
+    text-ink
+    border-2 border-white/10
+    active:bg-accent
+    active:text-white
+    transition-colors
+  `;
 
   return (
     <div className="space-y-4">
 
       {!somenteNumeros && (
         <>
-          <div className="grid grid-cols-13 gap-3">
+          <div className="flex justify-center gap-2 flex-wrap">
             {linha1.map((tecla) => (
               <button
                 key={tecla}
                 type="button"
                 onClick={() => adicionar(tecla)}
-                className={classeTecla}
+                className={teclaClass}
               >
                 {tecla}
               </button>
             ))}
           </div>
 
-          <div className="grid grid-cols-13 gap-3">
+          <div className="flex justify-center gap-2 flex-wrap">
             {linha2.map((tecla) => (
               <button
                 key={tecla}
                 type="button"
                 onClick={() => adicionar(tecla)}
-                className={classeTecla}
+                className={teclaClass}
               >
                 {tecla}
               </button>
@@ -68,24 +78,24 @@ export default function TecladoVirtual({
         <div className="h-px w-full bg-white/15" />
       )}
 
-      <div className="grid grid-cols-10 gap-3">
+      <div className="flex justify-center gap-2 flex-wrap">
         {NUMEROS.map((tecla) => (
           <button
             key={tecla}
             type="button"
             onClick={() => adicionar(tecla)}
-            className={classeTecla}
+            className={teclaClass}
           >
             {tecla}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 mt-4">
         <button
           type="button"
           onClick={limpar}
-          className="h-28 rounded-xl2 bg-danger text-white text-3xl font-bold"
+          className="h-20 rounded-xl2 bg-danger text-white text-2xl font-bold"
         >
           LIMPAR
         </button>
@@ -93,7 +103,7 @@ export default function TecladoVirtual({
         <button
           type="button"
           onClick={apagar}
-          className="h-28 rounded-xl2 bg-surface border-2 border-white/10 text-3xl font-bold text-ink"
+          className="h-20 rounded-xl2 bg-surface border-2 border-white/10 text-2xl font-bold text-ink"
         >
           ⌫ APAGAR
         </button>
@@ -102,7 +112,7 @@ export default function TecladoVirtual({
           <button
             type="button"
             onClick={onConfirmar}
-            className="h-28 rounded-xl2 bg-accent2 text-white text-3xl font-bold"
+            className="h-20 rounded-xl2 bg-accent2 text-white text-2xl font-bold"
           >
             {labelConfirmar}
           </button>
