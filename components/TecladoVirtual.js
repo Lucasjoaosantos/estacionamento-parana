@@ -26,23 +26,44 @@ export default function TecladoVirtual({
     onChange("");
   }
 
-  const teclas = somenteNumeros ? NUMEROS : [...LETRAS, ...NUMEROS];
-
   return (
     <div className="w-full flex flex-col gap-6">
-      <div className="grid grid-cols-6 gap-3">
-        {teclas.map((tecla) => (
-          <button
-            key={tecla}
-            type="button"
-            onClick={() => adicionar(tecla)}
-            className="h-20 rounded-xl2 bg-surface text-ink text-4xl font-bold
-                       border-2 border-white/10 active:bg-accent active:text-base
-                       transition-colors"
-          >
-            {tecla}
-          </button>
-        ))}
+      {/* Letras sempre fixas à esquerda, números sempre fixos à direita —
+          a posição de cada tecla não muda dependendo do que já foi digitado,
+          então quem já decorou onde fica cada uma não se perde. */}
+      <div className="flex gap-3 items-start">
+        {!somenteNumeros && (
+          <div className="grid grid-cols-5 gap-3 flex-1">
+            {LETRAS.map((tecla) => (
+              <button
+                key={tecla}
+                type="button"
+                onClick={() => adicionar(tecla)}
+                className="h-20 rounded-xl2 bg-surface text-ink text-4xl font-bold
+                           border-2 border-white/10 active:bg-accent active:text-base
+                           transition-colors"
+              >
+                {tecla}
+              </button>
+            ))}
+          </div>
+        )}
+        <div
+          className={`grid grid-cols-2 gap-3 ${somenteNumeros ? "flex-1" : "w-[168px] shrink-0"}`}
+        >
+          {NUMEROS.map((tecla) => (
+            <button
+              key={tecla}
+              type="button"
+              onClick={() => adicionar(tecla)}
+              className="h-20 rounded-xl2 bg-surface text-ink text-4xl font-bold
+                         border-2 border-white/10 active:bg-accent active:text-base
+                         transition-colors"
+            >
+              {tecla}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
