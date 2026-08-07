@@ -29,7 +29,7 @@ export default function TecladoVirtual({
   const linha2 = LETRAS.slice(13); // N - Z
 
 const teclaClass =
-  "w-5 h-20 rounded-xl2 bg-surface text-4xl font-bold text-ink border-2 border-white/10 active:bg-accent active:text-white transition-colors";
+  "w-20 h-20 rounded-xl2 bg-surface text-3xl font-bold text-ink border-2 border-white/10 active:bg-accent active:text-white transition-colors";
 
   return (
     <div className="space-y-4">
