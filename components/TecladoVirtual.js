@@ -25,28 +25,19 @@ export default function TecladoVirtual({
     onChange("");
   }
 
-  const linha1 = LETRAS.slice(0, 13); // A-M
-  const linha2 = LETRAS.slice(13);    // N-Z
+  const linha1 = LETRAS.slice(0, 13); // A - M
+  const linha2 = LETRAS.slice(13);    // N - Z
 
-  const teclaClass = `
-    w-16 h-20
-    rounded-xl2
-    bg-surface
-    text-3xl
-    font-bold
-    text-ink
-    border-2 border-white/10
-    active:bg-accent
-    active:text-white
-    transition-colors
-  `;
+  const teclaClass =
+    "h-20 rounded-xl2 bg-surface text-3xl font-bold text-ink border-2 border-white/10 active:bg-accent active:text-white transition-colors";
 
   return (
     <div className="space-y-4">
 
       {!somenteNumeros && (
         <>
-          <div className="flex justify-center gap-2 flex-wrap">
+          {/* A até M */}
+          <div className="grid grid-cols-13 gap-2">
             {linha1.map((tecla) => (
               <button
                 key={tecla}
@@ -59,7 +50,8 @@ export default function TecladoVirtual({
             ))}
           </div>
 
-          <div className="flex justify-center gap-2 flex-wrap">
+          {/* N até Z */}
+          <div className="grid grid-cols-13 gap-2">
             {linha2.map((tecla) => (
               <button
                 key={tecla}
@@ -78,7 +70,8 @@ export default function TecladoVirtual({
         <div className="h-px w-full bg-white/15" />
       )}
 
-      <div className="flex justify-center gap-2 flex-wrap">
+      {/* Números */}
+      <div className="grid grid-cols-10 gap-2">
         {NUMEROS.map((tecla) => (
           <button
             key={tecla}
@@ -91,7 +84,8 @@ export default function TecladoVirtual({
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mt-4">
+      {/* Botões inferiores */}
+      <div className="grid grid-cols-3 gap-3">
         <button
           type="button"
           onClick={limpar}
@@ -118,6 +112,7 @@ export default function TecladoVirtual({
           </button>
         )}
       </div>
+
     </div>
   );
 }
