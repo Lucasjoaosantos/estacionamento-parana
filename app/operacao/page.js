@@ -126,12 +126,12 @@ export default function OperacaoPage() {
   // ---------------------- TELA: NOVO CARRO ----------------------
   if (tela === "novo") {
     return (
-      <main className="min-h-screen flex flex-col items-center px-6 py-8 gap-6">
-        <h1 className="text-huge font-extrabold">Digite a placa</h1>
-        <div className="text-giant font-black text-accent tracking-widest">
+      <main className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-6 sm:py-8 gap-4 sm:gap-6">
+        <h1 className="text-2xl sm:text-huge font-extrabold text-center">Digite a placa</h1>
+        <div className="text-4xl sm:text-giant font-black text-accent tracking-widest">
           {placaDigitada || "______"}
         </div>
-        {mensagem && <p className="text-danger text-2xl font-bold">{mensagem}</p>}
+        {mensagem && <p className="text-danger text-lg sm:text-2xl font-bold text-center">{mensagem}</p>}
         <div className="w-full max-w-2xl">
           <TecladoVirtual
             valor={placaDigitada}
@@ -143,7 +143,7 @@ export default function OperacaoPage() {
         </div>
         <button
           onClick={() => { setTela("lista"); setPlacaDigitada(""); setMensagem(""); }}
-          className="mt-2 text-2xl font-bold text-muted underline"
+          className="mt-2 text-lg sm:text-2xl font-bold text-muted underline"
         >
           Cancelar
         </button>
@@ -156,28 +156,28 @@ export default function OperacaoPage() {
     const valor = valorSugerido?.valorSugerido || 0;
     const valorComDesconto = Math.max(0, valor - (Number(desconto) || 0));
     return (
-      <main className="min-h-screen flex flex-col items-center px-6 py-8 gap-6">
-        <h1 className="text-huge font-extrabold">Placa {carroSelecionado.placa}</h1>
-        <p className="text-3xl text-muted">
+      <main className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-6 sm:py-8 gap-4 sm:gap-6">
+        <h1 className="text-2xl sm:text-huge font-extrabold text-center">Placa {carroSelecionado.placa}</h1>
+        <p className="text-lg sm:text-3xl text-muted text-center">
           Tempo: {formatarDuracao(valorSugerido?.minutosTotais || 0)}
         </p>
-        <p className="text-giant font-black text-accent">
+        <p className="text-4xl sm:text-giant font-black text-accent">
           {formatarMoeda(valorComDesconto)}
         </p>
 
         <div className="w-full max-w-xl flex flex-col gap-3">
-          <p className="text-2xl font-semibold text-center">Houve desconto?</p>
+          <p className="text-lg sm:text-2xl font-semibold text-center">Houve desconto?</p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => { setTemDesconto(false); setDesconto("0"); setValorCobradoDigitos(""); }}
-              className={`px-8 py-4 rounded-xl2 text-2xl font-bold border-2
+              className={`px-6 sm:px-8 py-3 sm:py-4 rounded-xl2 text-lg sm:text-2xl font-bold border-2
                 ${temDesconto === false ? "bg-accent text-base border-accent" : "bg-surface border-white/10"}`}
             >
               NÃO
             </button>
             <button
               onClick={() => setTemDesconto(true)}
-              className={`px-8 py-4 rounded-xl2 text-2xl font-bold border-2
+              className={`px-6 sm:px-8 py-3 sm:py-4 rounded-xl2 text-lg sm:text-2xl font-bold border-2
                 ${temDesconto === true ? "bg-accent text-base border-accent" : "bg-surface border-white/10"}`}
             >
               SIM
@@ -186,8 +186,8 @@ export default function OperacaoPage() {
 
           {temDesconto === true && (
             <div className="flex flex-col gap-3 mt-2">
-              <p className="text-2xl font-semibold text-center">Qual o valor cobrado?</p>
-              <p className="text-giant font-black text-accent text-center">
+              <p className="text-lg sm:text-2xl font-semibold text-center">Qual o valor cobrado?</p>
+              <p className="text-4xl sm:text-giant font-black text-accent text-center">
                 {formatarMoeda(Number(valorCobradoDigitos || 0) / 100)}
               </p>
               <TecladoVirtual
@@ -202,41 +202,41 @@ export default function OperacaoPage() {
 
         {(temDesconto === false || (temDesconto === true && valorCobradoDigitos)) && (
           <>
-            <p className="text-3xl font-bold mt-4">Forma de pagamento:</p>
-            <div className="grid grid-cols-1 gap-4 w-full max-w-xl">
+            <p className="text-xl sm:text-3xl font-bold mt-4">Forma de pagamento:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl">
           <button
             onClick={() => confirmarPagamento("dinheiro")}
             disabled={enviandoPagamento}
-            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold disabled:opacity-50"
+            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
           >
             💵 DINHEIRO
           </button>
           <button
             onClick={() => confirmarPagamento("cartao")}
             disabled={enviandoPagamento}
-            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold disabled:opacity-50"
+            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
           >
             💳 CARTÃO
           </button>
           <button
             onClick={() => confirmarPagamento("pix")}
             disabled={enviandoPagamento}
-            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold disabled:opacity-50"
+            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
           >
             📱 PIX
           </button>
             </div>
             {enviandoPagamento && (
-              <p className="text-xl text-muted font-semibold">Registrando saída...</p>
+              <p className="text-lg sm:text-xl text-muted font-semibold">Registrando saída...</p>
             )}
           </>
         )}
 
-        {mensagem && <p className="text-danger text-2xl font-bold">{mensagem}</p>}
+        {mensagem && <p className="text-danger text-lg sm:text-2xl font-bold text-center">{mensagem}</p>}
 
         <button
           onClick={() => { setTela("lista"); setCarroSelecionado(null); }}
-          className="mt-2 text-2xl font-bold text-muted underline"
+          className="mt-2 text-lg sm:text-2xl font-bold text-muted underline"
         >
           Cancelar
         </button>
@@ -247,16 +247,16 @@ export default function OperacaoPage() {
   // ---------------------- TELA: LISTA (padrão) ----------------------
   return (
     <main className="min-h-screen flex flex-col items-center px-6 py-8 gap-6">
-      <div className="w-full flex justify-between items-center max-w-3xl">
+      <div className="w-full flex flex-wrap gap-3 justify-between items-center max-w-3xl">
         <div className="flex items-center gap-3">
-          <img src="/logo.jpg" alt="Estacionamento Paraná" className="w-14 h-14 rounded-xl" />
-          <h1 className="text-4xl font-extrabold">Estacionamento Paraná</h1>
+          <img src="/logo.jpg" alt="Estacionamento Paraná" className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl" />
+          <h1 className="text-xl sm:text-4xl font-extrabold">Estacionamento Paraná</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/gestao" className="text-xl font-bold text-accent underline">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Link href="/gestao" className="text-sm sm:text-xl font-bold text-accent underline whitespace-nowrap">
             Ver caixa/gestão
           </Link>
-          <button onClick={sair} className="text-xl font-bold text-muted underline">
+          <button onClick={sair} className="text-sm sm:text-xl font-bold text-muted underline">
             Sair
           </button>
         </div>
@@ -264,14 +264,14 @@ export default function OperacaoPage() {
 
       <button
         onClick={() => setTela("novo")}
-        className="w-full max-w-3xl h-28 rounded-xl2 bg-accent text-base text-4xl font-extrabold"
+        className="w-full max-w-3xl h-20 sm:h-28 rounded-xl2 bg-accent text-base text-2xl sm:text-4xl font-extrabold"
       >
         + NOVO CARRO
       </button>
 
       <div className="w-full max-w-3xl flex flex-col gap-4">
         {carros.length === 0 && (
-          <p className="text-3xl text-muted text-center py-10">
+          <p className="text-xl sm:text-3xl text-muted text-center py-10">
             Nenhum carro no pátio agora.
           </p>
         )}
@@ -279,15 +279,15 @@ export default function OperacaoPage() {
           <button
             key={carro.id}
             onClick={() => abrirPagamento(carro)}
-            className="w-full text-left rounded-xl2 bg-surface border-2 border-white/10 px-6 py-5 flex justify-between items-center"
+            className="w-full text-left rounded-xl2 bg-surface border-2 border-white/10 px-4 sm:px-6 py-4 sm:py-5 flex flex-wrap gap-2 justify-between items-center"
           >
             <div>
-              <div className="text-4xl font-black tracking-widest">{carro.placa}</div>
-              <div className="text-xl text-muted">
+              <div className="text-2xl sm:text-4xl font-black tracking-widest">{carro.placa}</div>
+              <div className="text-base sm:text-xl text-muted">
                 entrou {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </div>
             </div>
-            <div className="text-2xl font-bold text-accent">REGISTRAR SAÍDA →</div>
+            <div className="text-lg sm:text-2xl font-bold text-accent">REGISTRAR SAÍDA →</div>
           </button>
         ))}
       </div>
