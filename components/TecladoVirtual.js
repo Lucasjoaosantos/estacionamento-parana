@@ -33,13 +33,14 @@ export default function TecladoVirtual({
           então quem já decorou onde fica cada uma não se perde. */}
       <div className="flex gap-8 items-start">
         {!somenteNumeros && (
-          <div className="grid grid-cols-5 gap-3 flex-1">
+          <div className="flex flex-wrap justify-center content-start gap-3 flex-1">
             {LETRAS.map((tecla) => (
               <button
                 key={tecla}
                 type="button"
                 onClick={() => adicionar(tecla)}
-                className="h-20 rounded-xl2 bg-surface text-ink text-4xl font-bold
+                className="h-20 basis-[calc((100%-48px)/5)] grow-0 shrink-0
+                           rounded-xl2 bg-surface text-ink text-4xl font-bold
                            border-2 border-white/10 active:bg-accent active:text-base
                            transition-colors"
               >
