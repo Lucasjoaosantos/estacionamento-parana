@@ -12,6 +12,7 @@ export default function CaixaPage() {
   const [novaForma, setNovaForma] = useState("dinheiro");
   const [fechando, setFechando] = useState(false);
   const [mensagemFechamento, setMensagemFechamento] = useState("");
+  const [confirmandoFechamento, setConfirmandoFechamento] = useState(false);
 
   useEffect(() => {
     carregar();
@@ -44,16 +45,12 @@ export default function CaixaPage() {
   }
 
   async function fecharDiaAgora() {
-    const confirmou = window.confirm(
-      "Isso vai somar o caixa de hoje, salvar só o resumo financeiro, e APAGAR todas as placas e detalhes de carros de hoje (sem volta). Continuar?"
-    );
-    if (!confirmou) return;
-
     setFechando(true);
     setMensagemFechamento("");
     const resp = await fetch("/api/fechamento", { method: "POST" });
     const json = await resp.json();
     setFechando(false);
+    setConfirmandoFechamento(false);
 
     if (resp.ok) {
       setMensagemFechamento("Dia fechado com sucesso. Placas e detalhes de hoje foram apagados.");
@@ -139,13 +136,37 @@ export default function CaixaPage() {
           placas e detalhes dos carros de hoje. Não afeta carros que ainda estão no pátio.
           Isso também acontece automaticamente todo dia à meia-noite.
         </p>
-        <button
-          onClick={fecharDiaAgora}
-          disabled={fechando}
-          className="bg-danger text-white font-bold rounded-lg py-2 px-4 w-full"
-        >
-          {fechando ? "Fechando..." : "Fechar o dia agora"}
-        </button>
+
+        {!confirmandoFechamento ? (
+          <button
+            onClick={() => setConfirmandoFechamento(true)}
+            className="bg-danger text-white font-bold rounded-lg py-2 px-4 w-full"
+          >
+            Fechar o dia agora
+          </button>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-bold text-danger">
+              Isso vai apagar as placas e detalhes dos carros de hoje para sempre
+              (sem volta). Tem certeza?
+            </p>
+            <button
+              onClick={fecharDiaAgora}
+              disabled={fechando}
+              className="bg-danger text-white font-bold rounded-lg py-2 px-4 w-full"
+            >
+              {fechando ? "Fechando..." : "Sim, apagar as placas e fechar o dia"}
+            </button>
+            <button
+              onClick={() => setConfirmandoFechamento(false)}
+              disabled={fechando}
+              className="bg-surface border border-white/10 text-ink font-bold rounded-lg py-2 px-4 w-full"
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
         {mensagemFechamento && (
           <p className="text-xs mt-2 text-accent2 font-semibold">{mensagemFechamento}</p>
         )}
