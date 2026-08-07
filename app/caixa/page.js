@@ -113,16 +113,16 @@ export default function CaixaPage() {
         {dados.movimentos.map((mov) => (
           <div
             key={mov.id}
-            className="rounded-xl2 bg-surface border border-white/10 p-3 flex justify-between items-center"
+            className="rounded-xl2 bg-surface border border-white/10 p-3 flex flex-wrap gap-x-3 gap-y-1 justify-between items-center"
           >
-            <div>
-              <div className="text-sm font-semibold">{mov.descricao}</div>
+            <div className="min-w-0">
+              <div className="text-sm font-semibold break-words">{mov.descricao}</div>
               <div className="text-xs text-muted">
                 {new Date(mov.criado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                 {" · "}{mov.forma_pagamento}
               </div>
             </div>
-            <div className={`font-bold ${mov.tipo === "saida" ? "text-danger" : "text-accent2"}`}>
+            <div className={`font-bold shrink-0 ${mov.tipo === "saida" ? "text-danger" : "text-accent2"}`}>
               {mov.tipo === "saida" ? "-" : "+"}{formatarMoeda(mov.valor)}
             </div>
           </div>
