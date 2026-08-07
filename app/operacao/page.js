@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import TecladoVirtual from "@/components/TecladoVirtual";
 import { formatarDuracao, formatarMoeda } from "@/lib/pricing";
 
@@ -64,33 +65,56 @@ export default function OperacaoPage() {
     }
   }
 
+  const [temDesconto, setTemDesconto] = useState(null); // null | true | false
+  const [valorCobradoDigitos, setValorCobradoDigitos] = useState(""); // dígitos em centavos
+
   async function abrirPagamento(carro) {
     setCarroSelecionado(carro);
     setDesconto("");
+    setTemDesconto(null);
+    setValorCobradoDigitos("");
     const resp = await fetch(`/api/rotativo/${carro.id}`);
     const json = await resp.json();
     setValorSugerido(json);
     setTela("pagamento");
   }
 
+  // Sempre que o operador terminar de digitar o valor cobrado, recalcula
+  // o desconto (diferença entre o valor da tabela e o valor informado) —
+  // é esse desconto que fica salvo no registro, mas quem digita é o valor final.
+  useEffect(() => {
+    if (temDesconto !== true) return;
+    const valorTabela = valorSugerido?.valorSugerido || 0;
+    const valorCobrado = Number(valorCobradoDigitos || 0) / 100;
+    setDesconto(String(Math.max(0, valorTabela - valorCobrado)));
+  }, [temDesconto, valorCobradoDigitos, valorSugerido]);
+
+  const [enviandoPagamento, setEnviandoPagamento] = useState(false);
+
   async function confirmarPagamento(forma) {
-    const resp = await fetch("/api/rotativo", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: carroSelecionado.id,
-        forma_pagamento: forma,
-        desconto: Number(desconto) || 0,
-        usuario_id: usuario?.id,
-      }),
-    });
-    if (resp.ok) {
-      setTela("lista");
-      setCarroSelecionado(null);
-      carregarCarros();
-    } else {
-      const json = await resp.json();
-      setMensagem(json.erro || "Erro ao registrar pagamento.");
+    if (enviandoPagamento) return; // evita clique duplo lançar o pagamento duas vezes
+    setEnviandoPagamento(true);
+    try {
+      const resp = await fetch("/api/rotativo", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: carroSelecionado.id,
+          forma_pagamento: forma,
+          desconto: Number(desconto) || 0,
+          usuario_id: usuario?.id,
+        }),
+      });
+      if (resp.ok) {
+        setTela("lista");
+        setCarroSelecionado(null);
+        carregarCarros();
+      } else {
+        const json = await resp.json();
+        setMensagem(json.erro || "Erro ao registrar pagamento.");
+      }
+    } finally {
+      setEnviandoPagamento(false);
     }
   }
 
@@ -142,42 +166,71 @@ export default function OperacaoPage() {
         </p>
 
         <div className="w-full max-w-xl flex flex-col gap-3">
-          <p className="text-2xl font-semibold text-center">Desconto (se houver):</p>
-          <div className="flex gap-3 justify-center flex-wrap">
-            {[0, 2, 5, 10].map((v) => (
-              <button
-                key={v}
-                onClick={() => setDesconto(String(v))}
-                className={`px-6 py-4 rounded-xl2 text-2xl font-bold border-2
-                  ${Number(desconto) === v ? "bg-accent text-base border-accent" : "bg-surface border-white/10"}`}
-              >
-                {v === 0 ? "Sem desconto" : formatarMoeda(v)}
-              </button>
-            ))}
+          <p className="text-2xl font-semibold text-center">Houve desconto?</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => { setTemDesconto(false); setDesconto("0"); setValorCobradoDigitos(""); }}
+              className={`px-8 py-4 rounded-xl2 text-2xl font-bold border-2
+                ${temDesconto === false ? "bg-accent text-base border-accent" : "bg-surface border-white/10"}`}
+            >
+              NÃO
+            </button>
+            <button
+              onClick={() => setTemDesconto(true)}
+              className={`px-8 py-4 rounded-xl2 text-2xl font-bold border-2
+                ${temDesconto === true ? "bg-accent text-base border-accent" : "bg-surface border-white/10"}`}
+            >
+              SIM
+            </button>
           </div>
+
+          {temDesconto === true && (
+            <div className="flex flex-col gap-3 mt-2">
+              <p className="text-2xl font-semibold text-center">Qual o valor cobrado?</p>
+              <p className="text-giant font-black text-accent text-center">
+                {formatarMoeda(Number(valorCobradoDigitos || 0) / 100)}
+              </p>
+              <TecladoVirtual
+                valor={valorCobradoDigitos}
+                onChange={setValorCobradoDigitos}
+                somenteNumeros
+                maxLength={7}
+              />
+            </div>
+          )}
         </div>
 
-        <p className="text-3xl font-bold mt-4">Forma de pagamento:</p>
-        <div className="grid grid-cols-1 gap-4 w-full max-w-xl">
+        {(temDesconto === false || (temDesconto === true && valorCobradoDigitos)) && (
+          <>
+            <p className="text-3xl font-bold mt-4">Forma de pagamento:</p>
+            <div className="grid grid-cols-1 gap-4 w-full max-w-xl">
           <button
             onClick={() => confirmarPagamento("dinheiro")}
-            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold"
+            disabled={enviandoPagamento}
+            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold disabled:opacity-50"
           >
             💵 DINHEIRO
           </button>
           <button
             onClick={() => confirmarPagamento("cartao")}
-            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold"
+            disabled={enviandoPagamento}
+            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold disabled:opacity-50"
           >
             💳 CARTÃO
           </button>
           <button
             onClick={() => confirmarPagamento("pix")}
-            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold"
+            disabled={enviandoPagamento}
+            className="h-24 rounded-xl2 bg-accent2 text-white text-3xl font-extrabold disabled:opacity-50"
           >
             📱 PIX
           </button>
-        </div>
+            </div>
+            {enviandoPagamento && (
+              <p className="text-xl text-muted font-semibold">Registrando saída...</p>
+            )}
+          </>
+        )}
 
         {mensagem && <p className="text-danger text-2xl font-bold">{mensagem}</p>}
 
@@ -199,9 +252,14 @@ export default function OperacaoPage() {
           <img src="/logo.jpg" alt="Estacionamento Paraná" className="w-14 h-14 rounded-xl" />
           <h1 className="text-4xl font-extrabold">Estacionamento Paraná</h1>
         </div>
-        <button onClick={sair} className="text-xl font-bold text-muted underline">
-          Sair
-        </button>
+        <div className="flex items-center gap-4">
+          <Link href="/gestao" className="text-xl font-bold text-accent underline">
+            Ver caixa/gestão
+          </Link>
+          <button onClick={sair} className="text-xl font-bold text-muted underline">
+            Sair
+          </button>
+        </div>
       </div>
 
       <button
