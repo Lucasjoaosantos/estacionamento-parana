@@ -31,7 +31,7 @@ export default function TecladoVirtual({
       {/* Letras sempre fixas à esquerda, números sempre fixos à direita —
           a posição de cada tecla não muda dependendo do que já foi digitado,
           então quem já decorou onde fica cada uma não se perde. */}
-      <div className="flex gap-3 items-start">
+      <div className="flex gap-8 items-start">
         {!somenteNumeros && (
           <div className="grid grid-cols-5 gap-3 flex-1">
             {LETRAS.map((tecla) => (
@@ -47,6 +47,9 @@ export default function TecladoVirtual({
               </button>
             ))}
           </div>
+        )}
+        {!somenteNumeros && (
+          <div className="w-px self-stretch bg-white/15 shrink-0" />
         )}
         <div
           className={`grid grid-cols-2 gap-3 ${somenteNumeros ? "flex-1" : "w-[168px] shrink-0"}`}
