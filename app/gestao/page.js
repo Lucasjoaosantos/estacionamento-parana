@@ -56,15 +56,15 @@ export default function GestaoPage() {
           return (
             <div
               key={carro.id}
-              className="rounded-xl2 bg-surface border border-white/10 p-4 flex justify-between items-center"
+              className="rounded-xl2 bg-surface border border-white/10 p-4 flex flex-wrap gap-2 justify-between items-center"
             >
-              <div>
+              <div className="min-w-0">
                 <div className="text-xl font-black tracking-widest">{carro.placa}</div>
                 <div className="text-xs text-muted">
                   entrada {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
-              <div className="text-sm font-semibold text-accent">
+              <div className="text-sm font-semibold text-accent shrink-0">
                 {formatarDuracao(minutos)}
               </div>
             </div>
