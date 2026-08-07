@@ -21,12 +21,12 @@ export default function GestaoLayout({ children }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 bg-base z-10">
-        <div className="flex items-center gap-2">
-          <img src="/logo.jpg" alt="Estacionamento Paraná" className="w-8 h-8 rounded-md" />
-          <span className="font-extrabold text-lg">Estacionamento Paraná</span>
+      <header className="border-b border-white/10 px-3 sm:px-4 py-3 flex items-center justify-between gap-2 sticky top-0 bg-base z-10">
+        <div className="flex items-center gap-2 min-w-0">
+          <img src="/logo.jpg" alt="Estacionamento Paraná" className="w-8 h-8 rounded-md shrink-0" />
+          <span className="font-extrabold text-sm sm:text-lg truncate">Estacionamento Paraná</span>
         </div>
-        <button onClick={sair} className="text-sm font-semibold text-muted underline">
+        <button onClick={sair} className="text-sm font-semibold text-muted underline shrink-0">
           Sair
         </button>
       </header>
