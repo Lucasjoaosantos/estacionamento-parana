@@ -1,17 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import GestaoLayout from "@/components/GestaoLayout";
 
 export default function ConfiguracoesPage() {
+  const router = useRouter();
   const [config, setConfig] = useState(null);
   const [salvo, setSalvo] = useState(false);
+  const [modoAtual, setModoAtual] = useState("");
 
   useEffect(() => {
     fetch("/api/config")
       .then((r) => r.json())
       .then((json) => setConfig(json.config));
+    setModoAtual(localStorage.getItem("modoTela") || "");
   }, []);
+
+  function trocarModoTela() {
+    localStorage.removeItem("modoTela");
+    router.push("/escolher-modo");
+  }
 
   async function salvar() {
     setSalvo(false);
@@ -67,6 +76,27 @@ export default function ConfiguracoesPage() {
           Salvar
         </button>
         {salvo && <p className="text-accent2 text-sm font-semibold">Salvo com sucesso!</p>}
+      </div>
+
+      <div className="mt-8 rounded-xl2 bg-surface border border-white/10 p-4 max-w-sm">
+        <h2 className="text-lg font-bold mb-1">Tipo de tela deste aparelho</h2>
+        <p className="text-xs text-muted mb-3">
+          Modo atual:{" "}
+          <span className="font-semibold text-ink">
+            {modoAtual === "operacao"
+              ? "Tela grande e simples (Operação)"
+              : modoAtual === "gestao"
+              ? "Painel de gestão"
+              : "não definido"}
+          </span>
+          . Essa escolha é só deste navegador/aparelho — não muda nada para os outros.
+        </p>
+        <button
+          onClick={trocarModoTela}
+          className="bg-surface border-2 border-accent text-accent font-bold rounded-lg py-3 px-4 w-full"
+        >
+          Trocar tipo de tela deste aparelho
+        </button>
       </div>
     </GestaoLayout>
   );
