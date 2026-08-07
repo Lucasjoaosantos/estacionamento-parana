@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 const ABAS = [
   { href: "/gestao", label: "Visão geral" },
+  { href: "/operacao", label: "Entrada/Saída" },
   { href: "/caixa", label: "Caixa" },
   { href: "/gestao/configuracoes", label: "Tarifas" },
 ];
