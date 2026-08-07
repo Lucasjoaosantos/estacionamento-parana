@@ -102,6 +102,15 @@ export async function PATCH(request) {
     return NextResponse.json({ erro: "Registro não encontrado." }, { status: 404 });
   }
 
+  // Evita lançar o pagamento duas vezes no caixa (ex: clique duplo, ou dois
+  // aparelhos tentando registrar a saída do mesmo carro ao mesmo tempo).
+  if (registro.status === "finalizado") {
+    return NextResponse.json(
+      { erro: "A saída desse veículo já havia sido registrada." },
+      { status: 409 }
+    );
+  }
+
   const { data: configData } = await supabase
     .from("configuracoes")
     .select("*")
