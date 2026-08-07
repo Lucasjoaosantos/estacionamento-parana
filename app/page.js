@@ -12,10 +12,7 @@ export default function Home() {
       router.push("/login");
       return;
     }
-    const modo = localStorage.getItem("modoTela");
-    if (modo === "operacao") router.push("/operacao");
-    else if (modo === "gestao") router.push("/gestao");
-    else router.push("/escolher-modo");
+    router.push("/gestao");
   }, [router]);
 
   return (
