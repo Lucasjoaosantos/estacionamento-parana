@@ -39,7 +39,7 @@ export default function TecladoVirtual({
                 key={tecla}
                 type="button"
                 onClick={() => adicionar(tecla)}
-                className="h-20 rounded-xl2 bg-surface text-ink text-2x2 font-bold
+                className="h-20 rounded-xl2 bg-surface text-ink text-2x4 font-bold
                            border-2 border-white/10 active:bg-accent active:text-base
                            transition-colors"
               >
@@ -53,7 +53,7 @@ export default function TecladoVirtual({
                 key={tecla}
                 type="button"
                 onClick={() => adicionar(tecla)}
-                className="h-20 rounded-xl2 bg-surface text-ink text-2x2 font-bold
+                className="h-20 rounded-xl2 bg-surface text-ink text-2x4 font-bold
                            border-2 border-white/10 active:bg-accent active:text-base
                            transition-colors"
               >
@@ -72,7 +72,7 @@ export default function TecladoVirtual({
             key={tecla}
             type="button"
             onClick={() => adicionar(tecla)}
-            className="h-20 rounded-xl2 bg-surface text-ink text-2x2 font-bold
+            className="h-20 rounded-xl2 bg-surface text-ink text-2x4 font-bold
                        border-2 border-white/10 active:bg-accent active:text-base
                        transition-colors"
           >
@@ -85,14 +85,14 @@ export default function TecladoVirtual({
         <button
           type="button"
           onClick={limpar}
-          className="h-20 rounded-xl2 bg-danger text-white text-2x2 font-bold"
+          className="h-20 rounded-xl2 bg-danger text-white text-2x4 font-bold"
         >
           LIMPAR
         </button>
         <button
           type="button"
           onClick={apagar}
-          className="h-20 rounded-xl2 bg-surface border-2 border-white/10 text-ink text-2x2 font-bold"
+          className="h-20 rounded-xl2 bg-surface border-2 border-white/10 text-ink text-2x4 font-bold"
         >
           ⌫ APAGAR
         </button>
@@ -100,7 +100,7 @@ export default function TecladoVirtual({
           <button
             type="button"
             onClick={onConfirmar}
-            className="h-20 rounded-xl2 bg-accent2 text-white text-2x2 font-bold"
+            className="h-20 rounded-xl2 bg-accent2 text-white text-2x4 font-bold"
           >
             {labelConfirmar}
           </button>
