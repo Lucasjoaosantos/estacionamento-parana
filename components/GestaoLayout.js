@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 const ABAS = [
   { href: "/gestao", label: "Visão geral" },
   { href: "/operacao", label: "Entrada/Saída" },
-  { href: "/gestao/configuracoes", label: "Tarifas" },
 ];
 
 export default function GestaoLayout({ children }) {
