@@ -339,7 +339,7 @@ export default function OperacaoPage() {
                 {carro.pernoite && <span className="text-lg shrink-0" title="Vai pernoitar">🌙</span>}
               </div>
               {carro.veiculo_descricao && (
-                <div className="text-xs sm:text-sm text-muted truncate">{carro.veiculo_descricao}</div>
+                <div className="text-sm sm:text-base font-bold text-ink truncate">{carro.veiculo_descricao}</div>
               )}
               <div className="text-xs sm:text-sm text-muted">
                 entrou {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
