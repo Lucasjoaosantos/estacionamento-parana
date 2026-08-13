@@ -41,7 +41,7 @@ export default function GestaoPage() {
         </div>
       </div>
 
-      <h2 className="text-lg font-bold mb-2">Carros no pátio agora</h2>
+      <h2 className="text-lg font-bold mb-2">Carros no pátio rotativo agora</h2>
       <div className="flex flex-col gap-2">
         {carros.length === 0 && (
           <p className="text-muted text-sm py-4">Nenhum carro no pátio.</p>
