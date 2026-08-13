@@ -44,21 +44,31 @@ export default function LoginPage() {
       <h1 className="text-2xl sm:text-huge font-extrabold text-center">Entrar no sistema</h1>
 
       <div className="w-full max-w-xl flex flex-col gap-3 sm:gap-4">
-        <button
-          onClick={() => setCampoAtivo("usuario")}
-          className={`text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold break-all
-            ${campoAtivo === "usuario" ? "border-accent" : "border-white/10"} bg-surface`}
-        >
-          Usuário: <span className="text-accent">{usuario || "____"}</span>
-        </button>
+        <div>
+          <label className="text-sm sm:text-lg font-semibold text-muted">Usuário</label>
+          <input
+            type="text"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value.toUpperCase().slice(0, 20))}
+            onFocus={() => setCampoAtivo("usuario")}
+            onKeyDown={(e) => e.key === "Enter" && entrar()}
+            className={`w-full mt-1 text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold
+              ${campoAtivo === "usuario" ? "border-accent" : "border-white/10"} bg-surface text-accent`}
+          />
+        </div>
 
-        <button
-          onClick={() => setCampoAtivo("senha")}
-          className={`text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold break-all
-            ${campoAtivo === "senha" ? "border-accent" : "border-white/10"} bg-surface`}
-        >
-          Senha: <span className="text-accent">{"•".repeat(senha.length) || "____"}</span>
-        </button>
+        <div>
+          <label className="text-sm sm:text-lg font-semibold text-muted">Senha</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value.toUpperCase().slice(0, 20))}
+            onFocus={() => setCampoAtivo("senha")}
+            onKeyDown={(e) => e.key === "Enter" && entrar()}
+            className={`w-full mt-1 text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold
+              ${campoAtivo === "senha" ? "border-accent" : "border-white/10"} bg-surface text-accent`}
+          />
+        </div>
 
         {erro && (
           <p className="text-danger text-lg sm:text-2xl font-bold text-center">{erro}</p>
