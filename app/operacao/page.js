@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import TecladoVirtual from "@/components/TecladoVirtual";
-import { formatarDuracao } from "@/lib/pricing";
+import { formatarDuracao, formatarMoeda } from "@/lib/pricing";
 
 // Telas possíveis dentro da operação: lista de carros (em cards), digitar
 // placa nova, e tela de confirmação de saída (só tempo, sem pagamento).
@@ -18,6 +18,7 @@ export default function OperacaoPage() {
   const [campoAtivo, setCampoAtivo] = useState("placa"); // "placa" | "descricao" — qual campo o teclado na tela edita agora
   const [carroSelecionado, setCarroSelecionado] = useState(null);
   const [minutosDecorridos, setMinutosDecorridos] = useState(0);
+  const [valorDigitos, setValorDigitos] = useState(""); // dígitos em centavos, digitados na saída
   const [mensagem, setMensagem] = useState("");
   const [agora, setAgora] = useState(new Date());
   const [usuario, setUsuario] = useState(null);
@@ -81,14 +82,20 @@ export default function OperacaoPage() {
 
   async function abrirSaida(carro) {
     setCarroSelecionado(carro);
+    setValorDigitos("");
+    setMensagem("");
     const resp = await fetch(`/api/rotativo/${carro.id}`);
     const json = await resp.json();
     setMinutosDecorridos(json.minutosTotais || 0);
     setTela("saida");
   }
 
-  async function confirmarSaida() {
+  async function confirmarSaida(forma) {
     if (enviando) return; // evita clique duplo registrar a saída duas vezes
+    if (!valorDigitos) {
+      setMensagem("Informe o valor cobrado.");
+      return;
+    }
     setEnviando(true);
     try {
       const resp = await fetch("/api/rotativo", {
@@ -96,6 +103,8 @@ export default function OperacaoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: carroSelecionado.id,
+          valor: Number(valorDigitos) / 100,
+          forma_pagamento: forma,
           usuario_id: usuario?.id,
         }),
       });
@@ -216,19 +225,58 @@ export default function OperacaoPage() {
         )}
 
         <p className="text-lg sm:text-3xl text-muted text-center">Tempo no pátio:</p>
-        <p className="text-4xl sm:text-giant font-black text-accent">
+        <p className="text-2xl sm:text-huge font-black text-accent">
           {formatarDuracao(minutosDecorridos)}
         </p>
 
+        <div className="w-full max-w-xl flex flex-col gap-3">
+          <label className="text-lg sm:text-2xl font-semibold text-center">Valor cobrado</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={valorDigitos ? formatarMoeda(Number(valorDigitos) / 100) : ""}
+            onChange={(e) => setValorDigitos(e.target.value.replace(/\D/g, "").slice(0, 7))}
+            placeholder="R$ 0,00"
+            className="w-full px-4 py-3 sm:py-4 rounded-xl2 border-2 border-accent bg-surface
+                       text-3xl sm:text-giant font-black text-accent text-center"
+          />
+          <TecladoVirtual
+            valor={valorDigitos}
+            onChange={setValorDigitos}
+            somenteNumeros
+            maxLength={7}
+          />
+        </div>
+
         {mensagem && <p className="text-danger text-lg sm:text-2xl font-bold text-center">{mensagem}</p>}
 
-        <button
-          onClick={confirmarSaida}
-          disabled={enviando}
-          className="h-16 sm:h-24 w-full max-w-xl rounded-xl2 bg-accent2 text-white text-xl sm:text-4xl font-extrabold disabled:opacity-50"
-        >
-          {enviando ? "Registrando..." : "✅ CONFIRMAR SAÍDA"}
-        </button>
+        <p className="text-xl sm:text-3xl font-bold mt-2">Forma de pagamento:</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl">
+          <button
+            onClick={() => confirmarSaida("dinheiro")}
+            disabled={enviando}
+            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
+          >
+            💵 DINHEIRO
+          </button>
+          <button
+            onClick={() => confirmarSaida("cartao")}
+            disabled={enviando}
+            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
+          >
+            💳 CARTÃO
+          </button>
+          <button
+            onClick={() => confirmarSaida("pix")}
+            disabled={enviando}
+            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
+          >
+            📱 PIX
+          </button>
+        </div>
+        {enviando && (
+          <p className="text-lg sm:text-xl text-muted font-semibold">Registrando saída...</p>
+        )}
 
         <button
           onClick={() => { setTela("lista"); setCarroSelecionado(null); setMensagem(""); }}
