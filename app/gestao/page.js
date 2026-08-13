@@ -3,12 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import GestaoLayout from "@/components/GestaoLayout";
-import { formatarMoeda, formatarDuracao, calcularPermanencia } from "@/lib/pricing";
+import { formatarDuracao, calcularPermanencia } from "@/lib/pricing";
 
 export default function GestaoPage() {
   const router = useRouter();
   const [carros, setCarros] = useState([]);
-  const [resumoCaixa, setResumoCaixa] = useState(null);
 
   useEffect(() => {
     if (!localStorage.getItem("usuarioLogado")) {
@@ -21,13 +20,11 @@ export default function GestaoPage() {
   }, [router]);
 
   async function carregar() {
-    const [respCarros, respCaixa] = await Promise.all([
-      fetch("/api/rotativo?status=ativo"),
-      fetch("/api/caixa"),
-    ]);
-    setCarros((await respCarros.json()).rotativo || []);
-    setResumoCaixa((await respCaixa.json()).resumo || null);
+    const resp = await fetch("/api/rotativo?status=ativo");
+    setCarros((await resp.json()).rotativo || []);
   }
+
+  const qtdPernoite = carros.filter((c) => c.pernoite).length;
 
   return (
     <GestaoLayout>
@@ -39,10 +36,8 @@ export default function GestaoPage() {
           <div className="text-sm text-muted">carros no pátio</div>
         </div>
         <div className="rounded-xl2 bg-surface border border-white/10 p-4">
-          <div className="text-3xl font-black text-accent2">
-            {formatarMoeda(resumoCaixa?.total || 0)}
-          </div>
-          <div className="text-sm text-muted">faturado hoje</div>
+          <div className="text-3xl font-black text-accent">🌙 {qtdPernoite}</div>
+          <div className="text-sm text-muted">vão pernoitar</div>
         </div>
       </div>
 
@@ -59,7 +54,13 @@ export default function GestaoPage() {
               className="rounded-xl2 bg-surface border border-white/10 p-4 flex flex-wrap gap-2 justify-between items-center"
             >
               <div className="min-w-0">
-                <div className="text-xl font-black tracking-widest">{carro.placa}</div>
+                <div className="flex items-center gap-2">
+                  <div className="text-xl font-black tracking-widest">{carro.placa}</div>
+                  {carro.pernoite && <span title="Vai pernoitar">🌙</span>}
+                </div>
+                {carro.veiculo_descricao && (
+                  <div className="text-xs text-muted truncate">{carro.veiculo_descricao}</div>
+                )}
                 <div className="text-xs text-muted">
                   entrada {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                 </div>
