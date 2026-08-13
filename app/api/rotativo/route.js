@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
-import { calcularPermanencia, calcularValor } from "@/lib/pricing";
+import { calcularPermanencia } from "@/lib/pricing";
 
 // GET /api/rotativo?status=ativo   -> lista carros no estacionamento
 // GET /api/rotativo?status=todos   -> lista tudo (para relatórios)
@@ -24,13 +24,23 @@ export async function GET(request) {
   return NextResponse.json({ rotativo: data });
 }
 
-// POST /api/rotativo   { placa, usuario_id }  -> registra ENTRADA de carro novo
+// POST /api/rotativo   { placa, veiculo_descricao, pernoite, usuario_id }  -> registra ENTRADA de carro novo
 export async function POST(request) {
   const supabase = supabaseServer();
-  const { placa, usuario_id } = await request.json();
+  const { placa, veiculo_descricao, pernoite, usuario_id } = await request.json();
 
-  if (!placa) {
-    return NextResponse.json({ erro: "Informe a placa." }, { status: 400 });
+  if (!placa || placa.trim().length < 3) {
+    return NextResponse.json(
+      { erro: "Informe ao menos 3 caracteres da placa." },
+      { status: 400 }
+    );
+  }
+
+  if (!veiculo_descricao || !veiculo_descricao.trim()) {
+    return NextResponse.json(
+      { erro: "Informe uma descrição do veículo (cor, modelo, etc)." },
+      { status: 400 }
+    );
   }
 
   const placaFormatada = placa.toUpperCase().trim();
@@ -58,6 +68,8 @@ export async function POST(request) {
     .from("rotativo")
     .insert({
       placa: placaFormatada,
+      veiculo_descricao: veiculo_descricao.trim(),
+      pernoite: !!pernoite,
       usuario_entrada_id: usuario_id || null,
       status: "ativo",
     })
@@ -79,17 +91,15 @@ export async function POST(request) {
   return NextResponse.json({ registro: data });
 }
 
-// PATCH /api/rotativo   { id, forma_pagamento, desconto, usuario_id }
-//   -> registra SAÍDA + pagamento, calcula valor e lança no caixa
+// PATCH /api/rotativo   { id, usuario_id }
+//   -> registra SAÍDA (só marca o horário de saída e calcula quanto tempo ficou —
+//      não envolve pagamento nem valores, é só controle de permanência)
 export async function PATCH(request) {
   const supabase = supabaseServer();
-  const { id, forma_pagamento, desconto, usuario_id } = await request.json();
+  const { id, usuario_id } = await request.json();
 
-  if (!id || !forma_pagamento) {
-    return NextResponse.json(
-      { erro: "Informe o id e a forma de pagamento." },
-      { status: 400 }
-    );
+  if (!id) {
+    return NextResponse.json({ erro: "Informe o id do veículo." }, { status: 400 });
   }
 
   const { data: registro, error: erroBusca } = await supabase
@@ -102,7 +112,7 @@ export async function PATCH(request) {
     return NextResponse.json({ erro: "Registro não encontrado." }, { status: 404 });
   }
 
-  // Evita lançar o pagamento duas vezes no caixa (ex: clique duplo, ou dois
+  // Evita registrar a saída duas vezes (ex: clique duplo, ou dois
   // aparelhos tentando registrar a saída do mesmo carro ao mesmo tempo).
   if (registro.status === "finalizado") {
     return NextResponse.json(
@@ -111,28 +121,14 @@ export async function PATCH(request) {
     );
   }
 
-  const { data: configData } = await supabase
-    .from("configuracoes")
-    .select("*")
-    .eq("id", 1)
-    .single();
-
   const saida = new Date();
   const minutosTotais = calcularPermanencia(registro.entrada, saida);
-  const { valor } = calcularValor(minutosTotais, configData);
-
-  const descontoAplicado = Number(desconto) || 0;
-  const valorCobrado = Math.max(0, valor - descontoAplicado);
 
   const { data: atualizado, error: erroUpdate } = await supabase
     .from("rotativo")
     .update({
       saida: saida.toISOString(),
       minutos_totais: minutosTotais,
-      valor_calculado: valor,
-      desconto: descontoAplicado,
-      valor_cobrado: valorCobrado,
-      forma_pagamento,
       status: "finalizado",
       usuario_saida_id: usuario_id || null,
     })
@@ -141,16 +137,6 @@ export async function PATCH(request) {
     .single();
 
   if (erroUpdate) return NextResponse.json({ erro: erroUpdate.message }, { status: 500 });
-
-  await supabase.from("caixa_movimentos").insert({
-    tipo: "entrada",
-    origem: "rotativo",
-    referencia_id: id,
-    valor: valorCobrado,
-    forma_pagamento,
-    descricao: `Rotativo - placa ${registro.placa}`,
-    usuario_id: usuario_id || null,
-  });
 
   return NextResponse.json({ registro: atualizado });
 }
