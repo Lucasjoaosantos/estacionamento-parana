@@ -207,7 +207,7 @@ export default function OperacaoPage() {
           Placa {carroSelecionado.placa}
         </h1>
         {carroSelecionado.veiculo_descricao && (
-          <p className="text-lg sm:text-2xl font-bold text-ink text-center">
+          <p className="text-lg sm:text-2xl text-muted text-center">
             {carroSelecionado.veiculo_descricao}
           </p>
         )}
@@ -291,7 +291,7 @@ export default function OperacaoPage() {
                 {carro.pernoite && <span className="text-lg shrink-0" title="Vai pernoitar">🌙</span>}
               </div>
               {carro.veiculo_descricao && (
-                <div className="text-base sm:text-xl font-bold text-ink truncate">{carro.veiculo_descricao}</div>
+                <div className="text-xs sm:text-sm text-muted truncate">{carro.veiculo_descricao}</div>
               )}
               <div className="text-xs sm:text-sm text-muted">
                 entrou {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
