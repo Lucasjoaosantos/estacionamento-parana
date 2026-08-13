@@ -59,7 +59,7 @@ export default function GestaoPage() {
                   {carro.pernoite && <span title="Vai pernoitar">🌙</span>}
                 </div>
                 {carro.veiculo_descricao && (
-                  <div className="text-sm sm:text-base font-bold text-ink truncate">{carro.veiculo_descricao}</div>
+                  <div className="text-xs text-muted truncate">{carro.veiculo_descricao}</div>
                 )}
                 <div className="text-xs text-muted">
                   entrada {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
