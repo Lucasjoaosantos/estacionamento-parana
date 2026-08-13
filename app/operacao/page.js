@@ -12,6 +12,7 @@ export default function OperacaoPage() {
   const router = useRouter();
   const [tela, setTela] = useState("lista");
   const [carros, setCarros] = useState([]);
+  const [busca, setBusca] = useState("");
   const [placaDigitada, setPlacaDigitada] = useState("");
   const [veiculoDescricao, setVeiculoDescricao] = useState("");
   const [pernoite, setPernoite] = useState(false);
@@ -90,7 +91,7 @@ export default function OperacaoPage() {
     setTela("saida");
   }
 
-  async function confirmarSaida(forma) {
+  async function confirmarSaida() {
     if (enviando) return; // evita clique duplo registrar a saída duas vezes
     if (!valorDigitos) {
       setMensagem("Informe o valor cobrado.");
@@ -104,7 +105,6 @@ export default function OperacaoPage() {
         body: JSON.stringify({
           id: carroSelecionado.id,
           valor: Number(valorDigitos) / 100,
-          forma_pagamento: forma,
           usuario_id: usuario?.id,
         }),
       });
@@ -158,9 +158,9 @@ export default function OperacaoPage() {
           <input
             type="text"
             value={veiculoDescricao}
-            onChange={(e) => setVeiculoDescricao(e.target.value.slice(0, 60))}
+            onChange={(e) => setVeiculoDescricao(e.target.value.toUpperCase().slice(0, 60))}
             onFocus={() => setCampoAtivo("descricao")}
-            placeholder="Ex: Gol prata, HB20 branco..."
+            placeholder="Ex: GOL PRATA, HB20 BRANCO..."
             className={`w-full px-4 py-3 sm:py-4 rounded-xl2 border-2 bg-surface text-lg sm:text-2xl font-semibold
               ${campoAtivo === "descricao" ? "border-accent" : "border-white/10"}`}
           />
@@ -216,7 +216,7 @@ export default function OperacaoPage() {
           Placa {carroSelecionado.placa}
         </h1>
         {carroSelecionado.veiculo_descricao && (
-          <p className="text-xl sm:text-3xl font-extrabold text-white text-center">
+          <p className="text-xl sm:text-3xl font-extrabold text-white text-center uppercase">
             {carroSelecionado.veiculo_descricao}
           </p>
         )}
@@ -250,28 +250,13 @@ export default function OperacaoPage() {
 
         {mensagem && <p className="text-danger text-lg sm:text-2xl font-bold text-center">{mensagem}</p>}
 
-        <p className="text-xl sm:text-3xl font-bold mt-2">Forma de pagamento:</p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl">
+        <div className="w-full max-w-xl">
           <button
-            onClick={() => confirmarSaida("dinheiro")}
+            onClick={() => confirmarSaida()}
             disabled={enviando}
-            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
+            className="w-full h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
           >
-            💵 DINHEIRO
-          </button>
-          <button
-            onClick={() => confirmarSaida("cartao")}
-            disabled={enviando}
-            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
-          >
-            💳 CARTÃO
-          </button>
-          <button
-            onClick={() => confirmarSaida("pix")}
-            disabled={enviando}
-            className="h-16 sm:h-24 rounded-xl2 bg-accent2 text-white text-xl sm:text-3xl font-extrabold disabled:opacity-50"
-          >
-            📱 PIX
+            ✅ CONFIRMAR SAÍDA
           </button>
         </div>
         {enviando && (
@@ -288,6 +273,17 @@ export default function OperacaoPage() {
       </main>
     );
   }
+
+  // Filtra a lista pela placa ou pela descrição (ex: digitar "GOL" traz
+  // todos os carros cuja placa ou descrição contenham esse texto).
+  const termoBusca = busca.trim().toUpperCase();
+  const carrosFiltrados = termoBusca
+    ? carros.filter(
+        (carro) =>
+          carro.placa?.toUpperCase().includes(termoBusca) ||
+          carro.veiculo_descricao?.toUpperCase().includes(termoBusca)
+      )
+    : carros;
 
   // ---------------------- TELA: LISTA EM CARDS (padrão) ----------------------
   return (
@@ -314,17 +310,29 @@ export default function OperacaoPage() {
         + NOVO CARRO
       </button>
 
+      <div className="w-full max-w-6xl">
+        <input
+          type="text"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="🔎 Buscar por placa ou modelo (ex: GOL)"
+          className="w-full px-4 py-3 sm:py-4 rounded-xl2 border-2 border-white/10 bg-surface
+                     text-base sm:text-xl font-semibold focus:border-accent outline-none"
+        />
+      </div>
+
       <p className="w-full max-w-6xl text-sm sm:text-lg text-muted">
-        {carros.length} {carros.length === 1 ? "carro" : "carros"} no pátio
+        {carrosFiltrados.length} {carrosFiltrados.length === 1 ? "carro" : "carros"}
+        {busca.trim() ? " encontrados" : " no pátio"}
       </p>
 
       <div className="w-full max-w-6xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-        {carros.length === 0 && (
+        {carrosFiltrados.length === 0 && (
           <p className="col-span-full text-xl sm:text-3xl text-muted text-center py-10">
-            Nenhum carro no pátio agora.
+            {busca.trim() ? "Nenhum carro encontrado." : "Nenhum carro no pátio agora."}
           </p>
         )}
-        {carros.map((carro) => {
+        {carrosFiltrados.map((carro) => {
           const minutos = Math.max(0, Math.round((agora - new Date(carro.entrada)) / 60000));
           return (
             <button
@@ -339,7 +347,7 @@ export default function OperacaoPage() {
                 {carro.pernoite && <span className="text-lg shrink-0" title="Vai pernoitar">🌙</span>}
               </div>
               {carro.veiculo_descricao && (
-                <div className="text-lg sm:text-xl font-extrabold text-white truncate">{carro.veiculo_descricao}</div>
+                <div className="text-lg sm:text-xl font-extrabold text-white truncate uppercase">{carro.veiculo_descricao}</div>
               )}
               <div className="text-xs sm:text-sm text-muted">
                 entrou {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
