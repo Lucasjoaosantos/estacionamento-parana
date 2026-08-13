@@ -317,7 +317,7 @@ export default function OperacaoPage() {
           onChange={(e) => setBusca(e.target.value)}
           placeholder="🔎 Buscar por placa ou modelo (ex: GOL)"
           className="w-full px-4 py-3 sm:py-4 rounded-xl2 border-2 border-white/10 bg-surface
-                     text-base sm:text-xl font-semibold focus:border-accent outline-none"
+                     text-base sm:text-xl font-bold text-white placeholder:text-muted placeholder:font-semibold focus:border-accent outline-none"
         />
       </div>
 
