@@ -1,51 +1,90 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import GestaoLayout from "@/components/GestaoLayout";
+import { formatarDuracao, formatarMoeda, calcularPermanencia } from "@/lib/pricing";
 
-const ABAS = [
-  { href: "/gestao", label: "Visão geral" },
-  { href: "/operacao", label: "Entrada/Saída" },
-];
-
-export default function GestaoLayout({ children }) {
-  const pathname = usePathname();
+export default function GestaoPage() {
   const router = useRouter();
+  const [carros, setCarros] = useState([]);
+  const [valorTotalHoje, setValorTotalHoje] = useState(0);
 
-  function sair() {
-    localStorage.removeItem("usuarioLogado");
-    router.push("/login");
+  useEffect(() => {
+    if (!localStorage.getItem("usuarioLogado")) {
+      router.push("/login");
+      return;
+    }
+    carregar();
+    const intervalo = setInterval(carregar, 20000);
+    return () => clearInterval(intervalo);
+  }, [router]);
+
+  async function carregar() {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const [respAtivo, respFinalizadoHoje] = await Promise.all([
+      fetch("/api/rotativo?status=ativo"),
+      fetch(`/api/rotativo?status=finalizado&data=${hoje}`),
+    ]);
+    setCarros((await respAtivo.json()).rotativo || []);
+    const finalizadosHoje = (await respFinalizadoHoje.json()).rotativo || [];
+    const total = finalizadosHoje.reduce((soma, c) => soma + Number(c.valor_cobrado || 0), 0);
+    setValorTotalHoje(total);
   }
 
+  const qtdPernoite = carros.filter((c) => c.pernoite).length;
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-white/10 px-3 sm:px-4 py-3 flex items-center justify-between gap-2 sticky top-0 bg-base z-10">
-        <div className="flex items-center gap-2 min-w-0">
-          <img src="/logo.jpg" alt="Estacionamento Paraná" className="w-8 h-8 rounded-md shrink-0" />
-          <span className="font-extrabold text-sm sm:text-lg truncate">Estacionamento Paraná</span>
+    <GestaoLayout>
+      <h1 className="text-2xl font-extrabold mb-4">Visão geral</h1>
+
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="rounded-xl2 bg-surface border border-white/10 p-4">
+          <div className="text-3xl font-black text-accent">{carros.length}</div>
+          <div className="text-sm text-muted">carros no pátio</div>
         </div>
-        <button onClick={sair} className="text-sm font-semibold text-muted underline shrink-0">
-          Sair
-        </button>
-      </header>
+        <div className="rounded-xl2 bg-surface border border-white/10 p-4">
+          <div className="text-3xl font-black text-accent">🌙 {qtdPernoite}</div>
+          <div className="text-sm text-muted">vão pernoitar</div>
+        </div>
+      </div>
 
-      <nav className="flex border-b border-white/10 overflow-x-auto">
-        {ABAS.map((aba) => (
-          <Link
-            key={aba.href}
-            href={aba.href}
-            className={`px-4 py-3 text-sm font-semibold whitespace-nowrap ${
-              pathname === aba.href
-                ? "text-accent border-b-2 border-accent"
-                : "text-muted"
-            }`}
-          >
-            {aba.label}
-          </Link>
-        ))}
-      </nav>
+      <div className="rounded-xl2 bg-surface border border-white/10 p-4 mb-6">
+        <div className="text-3xl font-black text-accent2">{formatarMoeda(valorTotalHoje)}</div>
+        <div className="text-sm text-muted">valor total recebido hoje</div>
+      </div>
 
-      <main className="flex-1 px-4 py-5 max-w-3xl w-full mx-auto">{children}</main>
-    </div>
+      <h2 className="text-lg font-bold mb-2">Carros no pátio agora</h2>
+      <div className="flex flex-col gap-2">
+        {carros.length === 0 && (
+          <p className="text-muted text-sm py-4">Nenhum carro no pátio.</p>
+        )}
+        {carros.map((carro) => {
+          const minutos = calcularPermanencia(carro.entrada, new Date());
+          return (
+            <div
+              key={carro.id}
+              className="rounded-xl2 bg-surface border border-white/10 p-4 flex flex-wrap gap-2 justify-between items-center"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="text-xl font-black tracking-widest">{carro.placa}</div>
+                  {carro.pernoite && <span title="Vai pernoitar">🌙</span>}
+                </div>
+                {carro.veiculo_descricao && (
+                  <div className="text-xs text-muted truncate">{carro.veiculo_descricao}</div>
+                )}
+                <div className="text-xs text-muted">
+                  entrada {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                </div>
+              </div>
+              <div className="text-sm font-semibold text-accent shrink-0">
+                {formatarDuracao(minutos)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </GestaoLayout>
   );
 }
