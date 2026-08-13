@@ -77,7 +77,7 @@ export async function POST(request) {
     .from("rotativo")
     .insert({
       placa: placaFormatada,
-      veiculo_descricao: veiculo_descricao.trim(),
+      veiculo_descricao: veiculo_descricao.trim().toUpperCase(),
       pernoite: !!pernoite,
       usuario_entrada_id: usuario_id || null,
       status: "ativo",
@@ -100,12 +100,12 @@ export async function POST(request) {
   return NextResponse.json({ registro: data });
 }
 
-// PATCH /api/rotativo   { id, valor, forma_pagamento, usuario_id }
+// PATCH /api/rotativo   { id, valor, usuario_id }
 //   -> registra SAÍDA + o valor que o operador digitou (não é calculado
 //      automaticamente por tarifa — o operador informa o valor cobrado)
 export async function PATCH(request) {
   const supabase = supabaseServer();
-  const { id, valor, forma_pagamento, usuario_id } = await request.json();
+  const { id, valor, usuario_id } = await request.json();
 
   if (!id) {
     return NextResponse.json({ erro: "Informe o id do veículo." }, { status: 400 });
@@ -113,10 +113,6 @@ export async function PATCH(request) {
 
   if (valor === undefined || valor === null || isNaN(Number(valor)) || Number(valor) < 0) {
     return NextResponse.json({ erro: "Informe o valor cobrado." }, { status: 400 });
-  }
-
-  if (!forma_pagamento || !["dinheiro", "cartao", "pix"].includes(forma_pagamento)) {
-    return NextResponse.json({ erro: "Informe a forma de pagamento." }, { status: 400 });
   }
 
   const { data: registro, error: erroBusca } = await supabase
@@ -147,7 +143,6 @@ export async function PATCH(request) {
       saida: saida.toISOString(),
       minutos_totais: minutosTotais,
       valor_cobrado: Number(valor),
-      forma_pagamento,
       status: "finalizado",
       usuario_saida_id: usuario_id || null,
     })
