@@ -33,11 +33,11 @@ export default function GestaoPage() {
       <div className="grid grid-cols-2 gap-3 mb-6">
         <div className="rounded-xl2 bg-surface border border-white/10 p-4">
           <div className="text-3xl font-black text-accent">{carros.length}</div>
-          <div className="text-sm text-muted">carros no pátio</div>
+          <div className="text-sm text-muted">Carros no Pátio</div>
         </div>
         <div className="rounded-xl2 bg-surface border border-white/10 p-4">
           <div className="text-3xl font-black text-accent">🌙 {qtdPernoite}</div>
-          <div className="text-sm text-muted">vão pernoitar</div>
+          <div className="text-sm text-muted">Vão Pernoitar?</div>
         </div>
       </div>
 
