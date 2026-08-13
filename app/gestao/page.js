@@ -33,15 +33,15 @@ export default function GestaoPage() {
       <div className="grid grid-cols-2 gap-3 mb-6">
         <div className="rounded-xl2 bg-surface border border-white/10 p-4">
           <div className="text-3xl font-black text-accent">{carros.length}</div>
-          <div className="text-sm text-muted">Carros no Pátio</div>
+          <div className="text-sm text-muted">carros no pátio</div>
         </div>
         <div className="rounded-xl2 bg-surface border border-white/10 p-4">
           <div className="text-3xl font-black text-accent">🌙 {qtdPernoite}</div>
-          <div className="text-sm text-muted">Carros que vão pernoitar</div>
+          <div className="text-sm text-muted">vão pernoitar</div>
         </div>
       </div>
 
-      <h2 className="text-lg font-bold mb-2">Carros no pátio rotativo agora</h2>
+      <h2 className="text-lg font-bold mb-2">Carros no pátio agora</h2>
       <div className="flex flex-col gap-2">
         {carros.length === 0 && (
           <p className="text-muted text-sm py-4">Nenhum carro no pátio.</p>
@@ -59,7 +59,7 @@ export default function GestaoPage() {
                   {carro.pernoite && <span title="Vai pernoitar">🌙</span>}
                 </div>
                 {carro.veiculo_descricao && (
-                  <div className="text-xs text-muted truncate">{carro.veiculo_descricao}</div>
+                  <div className="text-sm sm:text-base font-bold text-ink truncate">{carro.veiculo_descricao}</div>
                 )}
                 <div className="text-xs text-muted">
                   entrada {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
