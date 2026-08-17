@@ -49,10 +49,13 @@ export default function LoginPage() {
           <input
             type="text"
             value={usuario}
-            onChange={(e) => setUsuario(e.target.value.toUpperCase().slice(0, 20))}
+            readOnly
+            inputMode="none"
+            autoComplete="off"
             onFocus={() => setCampoAtivo("usuario")}
-            onKeyDown={(e) => e.key === "Enter" && entrar()}
-            className={`w-full mt-1 text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold
+            onKeyDown={(e) => e.preventDefault()}
+            onPaste={(e) => e.preventDefault()}
+            className={`w-full mt-1 text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold cursor-default
               ${campoAtivo === "usuario" ? "border-accent" : "border-white/10"} bg-surface text-accent`}
           />
         </div>
@@ -62,10 +65,13 @@ export default function LoginPage() {
           <input
             type="password"
             value={senha}
-            onChange={(e) => setSenha(e.target.value.toUpperCase().slice(0, 20))}
+            readOnly
+            inputMode="none"
+            autoComplete="off"
             onFocus={() => setCampoAtivo("senha")}
-            onKeyDown={(e) => e.key === "Enter" && entrar()}
-            className={`w-full mt-1 text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold
+            onKeyDown={(e) => e.preventDefault()}
+            onPaste={(e) => e.preventDefault()}
+            className={`w-full mt-1 text-left px-4 sm:px-6 py-4 sm:py-5 rounded-xl2 border-2 text-xl sm:text-3xl font-semibold cursor-default
               ${campoAtivo === "senha" ? "border-accent" : "border-white/10"} bg-surface text-accent`}
           />
         </div>
