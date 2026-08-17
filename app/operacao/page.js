@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import TecladoVirtual from "@/components/TecladoVirtual";
-import { formatarDuracao, formatarMoeda } from "@/lib/pricing";
+import { formatarDuracao, formatarMoeda, formatarEntrada } from "@/lib/pricing";
 
 // Telas possíveis dentro da operação: lista de carros (em cards), digitar
 // placa nova, e tela de confirmação de saída (só tempo, sem pagamento).
@@ -78,6 +78,58 @@ export default function OperacaoPage() {
     } else {
       const json = await resp.json();
       setMensagem(json.erro || "Erro ao registrar entrada.");
+    }
+  }
+
+  // Abre a tela de edição para corrigir placa/descrição digitada errada,
+  // ou marcar/desmarcar o pernoite depois (quando o funcionário esquece
+  // na hora e só lembra mais tarde).
+  function abrirEdicao(carro, evento) {
+    evento?.stopPropagation(); // não deixa o clique também abrir a tela de saída
+    setCarroSelecionado(carro);
+    setPlacaDigitada(carro.placa || "");
+    setVeiculoDescricao(carro.veiculo_descricao || "");
+    setPernoite(!!carro.pernoite);
+    setCampoAtivo("placa");
+    setMensagem("");
+    setTela("editar");
+  }
+
+  async function confirmarEdicao() {
+    if (placaDigitada.trim().length < 3) {
+      setMensagem("Digite ao menos 3 caracteres da placa.");
+      return;
+    }
+    if (!veiculoDescricao.trim()) {
+      setMensagem("Informe uma descrição do veículo (cor, modelo, etc).");
+      return;
+    }
+    if (enviando) return;
+    setEnviando(true);
+    setMensagem("");
+    try {
+      const resp = await fetch(`/api/rotativo/${carroSelecionado.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          placa: placaDigitada,
+          veiculo_descricao: veiculoDescricao,
+          pernoite,
+        }),
+      });
+      if (resp.ok) {
+        setPlacaDigitada("");
+        setVeiculoDescricao("");
+        setPernoite(false);
+        setCarroSelecionado(null);
+        setTela("lista");
+        carregarCarros();
+      } else {
+        const json = await resp.json();
+        setMensagem(json.erro || "Erro ao salvar alteração.");
+      }
+    } finally {
+      setEnviando(false);
     }
   }
 
@@ -208,13 +260,101 @@ export default function OperacaoPage() {
     );
   }
 
+  // ---------------------- TELA: EDITAR CARRO (placa/descrição/pernoite) ----------------------
+  if (tela === "editar" && carroSelecionado) {
+    return (
+      <main className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-6 sm:py-8 gap-4 sm:gap-6">
+        <h1 className="text-2xl sm:text-huge font-extrabold text-center">✏️ Editar carro</h1>
+        <p className="text-sm sm:text-lg text-muted -mt-2">
+          Entrou {formatarEntrada(carroSelecionado.entrada)}
+        </p>
+
+        <div className="w-full max-w-2xl flex flex-col gap-3">
+          <label className="text-sm sm:text-lg font-semibold text-muted">Placa</label>
+          <input
+            type="text"
+            value={placaDigitada}
+            onChange={(e) => setPlacaDigitada(e.target.value.toUpperCase().slice(0, 7))}
+            onFocus={() => setCampoAtivo("placa")}
+            placeholder="Ex: ABC1234 ou ABC1"
+            className={`w-full px-4 py-3 sm:py-4 rounded-xl2 border-2 bg-surface text-2xl sm:text-4xl font-black tracking-widest text-center
+              ${campoAtivo === "placa" ? "border-accent" : "border-white/10"}`}
+          />
+
+          <label className="text-sm sm:text-lg font-semibold text-muted mt-2">
+            Descrição do veículo (cor, modelo, algo que ajude a identificar)
+          </label>
+          <input
+            type="text"
+            value={veiculoDescricao}
+            onChange={(e) => setVeiculoDescricao(e.target.value.toUpperCase().slice(0, 60))}
+            onFocus={() => setCampoAtivo("descricao")}
+            placeholder="Ex: GOL PRATA, HB20 BRANCO..."
+            className={`w-full px-4 py-3 sm:py-4 rounded-xl2 border-2 bg-surface text-lg sm:text-2xl font-semibold
+              ${campoAtivo === "descricao" ? "border-accent" : "border-white/10"}`}
+          />
+
+          <button
+            type="button"
+            onClick={() => setPernoite((v) => !v)}
+            className={`mt-2 flex items-center gap-3 px-4 py-3 sm:py-4 rounded-xl2 border-2 text-lg sm:text-2xl font-bold
+              ${pernoite ? "bg-accent text-base border-accent" : "bg-surface border-white/10"}`}
+          >
+            <span className={`w-6 h-6 rounded-md border-2 flex items-center justify-center
+              ${pernoite ? "bg-base border-base" : "border-muted"}`}>
+              {pernoite && <span className="text-accent text-sm font-black">✓</span>}
+            </span>
+            🌙 Esse carro vai pernoitar (ficar durante a noite)
+          </button>
+        </div>
+
+        {mensagem && <p className="text-danger text-lg sm:text-2xl font-bold text-center">{mensagem}</p>}
+
+        <div className="w-full max-w-2xl">
+          <TecladoVirtual
+            valor={valorCampoAtivo}
+            onChange={setValorCampoAtivo}
+            maxLength={campoAtivo === "placa" ? 7 : 60}
+            somenteNumeros={false}
+            onConfirmar={confirmarEdicao}
+            labelConfirmar={enviando ? "SALVANDO..." : "SALVAR ALTERAÇÃO"}
+          />
+        </div>
+
+        <button
+          onClick={() => {
+            setTela("lista");
+            setCarroSelecionado(null);
+            setPlacaDigitada("");
+            setVeiculoDescricao("");
+            setPernoite(false);
+            setMensagem("");
+          }}
+          disabled={enviando}
+          className="mt-2 text-lg sm:text-2xl font-bold text-muted underline"
+        >
+          Cancelar
+        </button>
+      </main>
+    );
+  }
+
   // ---------------------- TELA: CONFIRMAR SAÍDA ----------------------
   if (tela === "saida" && carroSelecionado) {
     return (
       <main className="min-h-screen flex flex-col items-center px-4 sm:px-6 py-6 sm:py-8 gap-4 sm:gap-6">
-        <h1 className="text-2xl sm:text-huge font-extrabold text-center">
-          Placa {carroSelecionado.placa}
-        </h1>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <h1 className="text-2xl sm:text-huge font-extrabold text-center">
+            Placa {carroSelecionado.placa}
+          </h1>
+          <button
+            onClick={(e) => abrirEdicao(carroSelecionado, e)}
+            title="Corrigir placa, descrição ou pernoite"
+            className="text-xl sm:text-3xl px-2 py-1 rounded-lg border-2 border-white/10 hover:border-accent"
+          >
+            ✏️
+          </button>
+        </div>
         {carroSelecionado.veiculo_descricao && (
           <p className="text-xl sm:text-3xl font-extrabold text-white text-center uppercase">
             {carroSelecionado.veiculo_descricao}
@@ -223,6 +363,9 @@ export default function OperacaoPage() {
         {carroSelecionado.pernoite && (
           <p className="text-base sm:text-xl font-bold text-accent">🌙 Marcado para pernoitar</p>
         )}
+        <p className="text-sm sm:text-lg text-muted -mt-3">
+          Entrou {formatarEntrada(carroSelecionado.entrada)}
+        </p>
 
         <p className="text-lg sm:text-3xl text-muted text-center">Tempo no pátio:</p>
         <p className="text-2xl sm:text-huge font-black text-accent">
@@ -344,13 +487,22 @@ export default function OperacaoPage() {
                 <div className="text-lg sm:text-2xl font-black tracking-widest break-all">
                   {carro.placa}
                 </div>
-                {carro.pernoite && <span className="text-lg shrink-0" title="Vai pernoitar">🌙</span>}
+                <div className="flex items-center gap-1 shrink-0">
+                  {carro.pernoite && <span className="text-lg" title="Vai pernoitar">🌙</span>}
+                  <span
+                    onClick={(e) => abrirEdicao(carro, e)}
+                    title="Corrigir placa, descrição ou pernoite"
+                    className="text-base sm:text-lg leading-none p-1 rounded-md hover:bg-white/10"
+                  >
+                    ✏️
+                  </span>
+                </div>
               </div>
               {carro.veiculo_descricao && (
                 <div className="text-lg sm:text-xl font-extrabold text-white truncate uppercase">{carro.veiculo_descricao}</div>
               )}
               <div className="text-xs sm:text-sm text-muted">
-                entrou {new Date(carro.entrada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                entrou {formatarEntrada(carro.entrada)}
               </div>
               <div className="text-sm sm:text-lg font-bold text-accent mt-1">
                 {formatarDuracao(minutos)}
